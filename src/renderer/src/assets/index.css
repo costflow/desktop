@@ -1,0 +1,24 @@
+.cf-app {
+  min-width: 600px;
+}
+.cf-font-logo {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 2rem;
+  text-decoration: none;
+}
+.cf-font-small {
+  font-weight: 500;
+  font-size: 12px;
+  text-decoration: none;
+}
+.cf-content {
+  height: calc(100vh - 75px);
+  min-height: 400px;
+}
+.cf-footer {
+  line-height: 36px;
+}
+.cf-footer li {
+  list-style: none;
+}

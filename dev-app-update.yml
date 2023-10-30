@@ -1,0 +1,4 @@
+provider: github
+owner: costflow.io
+repo: costflow/desktop
+updaterCacheDirName: costflow_app-updater
