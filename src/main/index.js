@@ -95,10 +95,8 @@ function loadConfig() {
 function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 1200,
+    width: 800,
     height: 700,
-    show: false,
-    autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -123,7 +121,7 @@ function createWindow() {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
   }
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished
@@ -183,19 +181,31 @@ async function startTelegramBot() {
     try {
       result = await costflow(ctx.message.text, costflowConfig);
       console.log(result);
-    } catch (error) {
-      console.log(error);
+      console.log(111);
+      if (result.output) {
+        insertNewEntryFromBot(result.output);
+      }
+      await ctx.replyWithMarkdownV2(`\`\`\`${result.output || result.error}\`\`\``);
+    } catch (err) {
+      console.log(err);
+      await ctx.replyWithMarkdownV2(`\`\`\`${err}\`\`\``);
     }
-    insertNewEntryFromBot(result.output);
-    await ctx.replyWithMarkdownV2(`\`\`\`${result.output}\`\`\``);
   });
-  bot.launch();
-  botStatus = 'running';
-  sendStatusToWindow('botStatus', botStatus);
+  try {
+    bot.launch();
+    botStatus = 'running';
+    sendStatusToWindow('botStatus', botStatus);
+  } catch (err) {
+    console.log(err);
+  }
   return 'ok';
 }
 async function stopTelegramBot() {
-  bot.stop();
+  try {
+    bot.stop();
+  } catch (err) {
+    console.log(err);
+  }
   botStatus = 'stopped';
   sendStatusToWindow('botStatus', botStatus);
   return 'ok';
