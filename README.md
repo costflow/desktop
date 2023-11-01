@@ -1,34 +1,33 @@
-# electron_app
+# Costflow Desktop Apps
 
-An Electron application with React.
+[Costflow](https://costflow.io/) is a set of open source products that make double-entry plain-text bookkeeping easier. Including [Syntax](https://www.costflow.io/docs/syntax/), [Parser](https://www.costflow.io/docs/parser/), [Desktop apps](https://www.costflow.io/docs/desktop-apps/), [CLI](https://www.costflow.io/docs/cli/), [Playground](https://playground.costflow.io/) and so on.
 
-## Recommended IDE Setup
+This repository is the source code of Costflow desktop apps.
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+## Download
 
-## Project Setup
+todo
 
-### Install
+## Desktop Features
 
-```bash
-$ pnpm install
-```
+- Quickly add entries using Costflow syntax;
+- All file manipulation is done locally;
+- Start your own Telegram bot right in the app, so you can keep plain-text bookkeeping anytime, anywhere;
 
-### Development
+## Docs
 
-```bash
-$ pnpm dev
-```
+[https://www.costflow.io/docs/desktop-apps/](https://www.costflow.io/docs/desktop-apps/)
 
-### Build
+## Filing Bugs
 
-```bash
-# For windows
-$ pnpm build:win
+Tickets can be filed at on the Github issues page:
 
-# For macOS
-$ pnpm build:mac
+https://github.com/costflow/desktop/issues
 
-# For Linux
-$ pnpm build:linux
-```
+## Donate
+
+todo
+
+## Author
+
+[leplay](http://leplay.net/)
