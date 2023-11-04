@@ -37,7 +37,7 @@ export const appendToLedger = async function (filePath, output, indexPath) {
       if (!isIndexFileExist) {
         await createFile(indexPath, '; Created by Costflow https://costflow.io/\n\n');
       }
-      fs.appendFileSync(indexPath, `include ${path.basename(filePath)}` + '\n\n', 'utf8');
+      fs.appendFileSync(indexPath, `include "${filePath}"` + '\n\n', 'utf8');
     }
   }
 
