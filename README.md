@@ -4,15 +4,17 @@
 
 This repository is the source code of Costflow desktop apps.
 
-## Download
+## Download for Mac / Windows / Linux
 
-https://github.com/costflow/desktop/releases
+https://download.costflow.io/
 
-## Desktop Features
+## Desktop App Features
 
 - Quickly add entries using Costflow syntax;
 - All file manipulation is done locally;
 - Start your own Telegram bot right in the app, so you can keep plain-text bookkeeping anytime, anywhere;
+- Open source;
+- Pay what you want;
 
 ## Docs
 
