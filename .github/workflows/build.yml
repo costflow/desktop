@@ -20,7 +20,7 @@ jobs:
           node-version: 18
           cache: yarn
 
-      - run: yarn install --frozen-lockfile --immutable --network-timeout ${{ inputs.npm_network_timeout }}
+      - run: yarn install --frozen-lockfile --immutable
 
       - name: Build/release Electron app
         uses: paneron/action-electron-builder@v1.8.1
