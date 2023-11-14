@@ -1,0 +1,60 @@
+name: test-dist
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+      node:
+        required: false
+        type: string
+        default: ${{ vars.DEFAULT_NODE_VERSION }}
+      cache_dir:
+        required: false
+        type: string
+        default: dist
+
+jobs:
+  test-dist:
+    name: Test distributions on ${{ inputs.os }}
+    runs-on: ${{ inputs.os }}
+
+    strategy:
+      fail-fast: false
+
+    concurrency:
+      group: '${{ github.workflow }}-${{ inputs.os }}-${{ inputs.node }}-${{ github.head_ref || github.ref_name }}'
+      cancel-in-progress: true
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Restore dist cache
+        uses: actions/download-artifact@v3
+        with:
+          name: dist-${{ inputs.os }}
+          path: ${{ inputs.cache_dir }}
+
+      # - if: startsWith(inputs.os, 'ubuntu')
+      #   run: |
+      #     sudo snap install ${{ inputs.cache_dir }}/costflow-desktop-*.snap --dangerous
+      #     sudo apt-get install xvfb
+      #     xvfb-run -- costflow --version
+
+      - if: startsWith(inputs.os, 'macos')
+        run: |
+          VOLUME=`hdiutil attach ${{ inputs.cache_dir }}/costflow-desktop-*.dmg | grep Volumes | cut -f 3-`
+          cp -rf "$VOLUME/Costflow.app" /Applications
+          hdiutil detach "$VOLUME"
+
+          /Applications/Costflow.app/Contents/MacOS/Costflow --version
+
+      - if: startsWith(inputs.os, 'windows')
+        shell: bash
+        run: |
+          ${{ inputs.cache_dir }}/costflow-desktop-*.exe --version

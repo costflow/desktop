@@ -1,0 +1,62 @@
+name: windows-latest
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    branches:
+      - main
+      - release
+    tags-ignore:
+      - v*
+    paths-ignore:
+      - '/*.sh'
+      - '/.*'
+      - '/_*'
+      - '/vcpkg.txt'
+      - 'docs/**'
+      - '**.adoc'
+      - '**.md'
+      - '**.nix'
+      - 'flake.lock'
+      - '.github/workflows/*.yml'
+      - '!.github/workflows/windows-latest.yml'
+      - '!.github/workflows/build-all.yml'
+      - '!.github/workflows/test-dist.yml'
+  pull_request:
+    paths-ignore:
+      - '/*.sh'
+      - '/.*'
+      - '/_*'
+      - '/vcpkg.txt'
+      - 'docs/**'
+      - '**.adoc'
+      - '**.md'
+      - '**.nix'
+      - 'flake.lock'
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.head_ref || github.ref_name }}'
+  cancel-in-progress: true
+
+jobs:
+  build-all:
+    uses: ./.github/workflows/build-all.yml
+    secrets: inherit
+    with:
+      os: windows-latest
+
+  test-dist:
+    needs: [build-all]
+    uses: ./.github/workflows/test-dist.yml
+    with:
+      os: windows-latest
+
+  # update-website:
+  #   needs: [test-dist]
+  #   # If the commit is tagged with a version (e.g. "v1.0.0"),
+  #   # that means a new release has been created.
+  #   # Update the website to show new version.
+  #   if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+  #   uses: ./.github/workflows/update-website.yml
+  #   secrets: inherit

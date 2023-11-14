@@ -1,0 +1,162 @@
+name: build-all
+# Reference: https://github.com/paneron/paneron/tree/release/.github/workflows
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+      node:
+        required: false
+        type: string
+        default: ${{ vars.DEFAULT_NODE_VERSION }}
+      max_build_attempts:
+        required: false
+        type: number
+        default: 5
+      cache_dir:
+        required: false
+        type: string
+        default: dist
+      npm_network_timeout:
+        required: false
+        type: number
+        default: 120000
+
+env:
+  # Disable console advertisements during install phase
+  ADBLOCK: true
+
+jobs:
+  build:
+    name: Build signed artifacts on ${{ inputs.os }}
+    runs-on: ${{ inputs.os }}
+
+    strategy:
+      fail-fast: false
+
+    concurrency:
+      group: '${{ github.workflow }}-${{ inputs.os }}-${{ inputs.node }}-${{ github.head_ref || github.ref_name }}-all'
+      cancel-in-progress: true
+
+    env:
+      USE_HARD_LINKS: false
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.node }}
+          cache: yarn
+
+      - run: yarn install --frozen-lockfile --immutable --network-timeout ${{ inputs.npm_network_timeout }}
+
+      - run: yarn compile
+
+      - name: Prepare for app notarization (macOS)
+        if: startsWith(inputs.os, 'macos')
+        # Import Apple API key for app notarization on macOS
+        run: |
+          mkdir -p ~/private_keys/
+          echo '${{ secrets.APPLE_API_KEY }}' > ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
+
+      # - name: Fetch platform-specific prerequisites
+      #   run: |
+      #     yarn fetch-dist-deps
+
+      - name: Run yarn dist for a maximum of ${{ inputs.max_build_attempts }} time(s)
+        run: |
+
+          notarization_log="notarization-error.log"
+
+          if [[ ${{ inputs.os }} = macos-* ]]
+          then
+            export CSC_KEY_PASSWORD='${{ secrets.MAC_CERTS_PASSWORD }}'
+            export CSC_LINK='${{ secrets.MAC_CERTS }}'
+          # Windows codesigning disabled until cloud HSM has been set up.
+          # elif [[ ${{ inputs.os }} = windows-* ]]
+          # then
+          #   export CSC_KEY_PASSWORD='${{ secrets.WINDOWS_CERTS_PASSWORD }}'
+          #   export CSC_LINK='${{ secrets.WINDOWS_CERTS }}'
+          fi
+
+          # Unset empty variables for electron-builder (mainly for Windows but may also help with other OSs)
+          for var in CSC_LINK CSC_KEY_PASSWORD
+          do
+            if [[ -z "${!var:-}" ]]
+            then
+              >&2 echo "info: unsetting empty \$${var} variable."
+              unset "${var}"
+            else
+              >&2 echo "info: keeping non-empty \$${var} variable."
+            fi
+          done
+
+          attempt=1
+          until yarn dist
+          do
+            >&2 echo "warning: ⚠️ Attempt #${attempt} failed."
+            if ((attempt >= ${{ inputs.max_build_attempts }}))
+            then
+              >&2 echo "error: ❌ Attempted ${{ inputs.max_build_attempts }} times and all have failed.  Aborting."
+              if [[ -r "${notarization_log}" ]]
+              then
+                >&2 printf "📝 \e[1;93mPrinting out notarization error log:\e[m\n"
+                >&2 echo
+                >&2 printf "\e[1m<NotarizationLog>\e[;33m\n"
+                >&2 echo
+                >&2 cat "${notarization_log}"
+                >&2 echo
+                >&2 printf "\e[;1m</NotarizationLog>\e[m\n"
+                >&2 echo
+                echo 'has_notarization_error=1' >> $GITHUB_ENV
+              fi
+              exit 1
+            fi
+            ((attempt++))
+          done
+          >&2 echo "info: ✅ Completed after attempt #${attempt}."
+        shell: bash
+        env:
+          # Always helpful for debugging non-interactive sessions
+          DEBUG: electron-builder
+
+          # macOS notarization
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+          # Windows codesigning
+          WINDOWS_CERTS_PASSWORD: ${{ secrets.WINDOWS_CERTS_PASSWORD }}
+          WINDOWS_CERTS: ${{ secrets.WINDOWS_CERTS }}
+
+          # macOS notarization
+          MAC_CERTS_PASSWORD: ${{ secrets.MAC_CERTS_PASSWORD }}
+          MAC_CERTS: ${{ secrets.MAC_CERTS }}
+
+          # electron-builder publishing
+          GH_TOKEN: ${{ secrets.GH_COSTFLOW_CI_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: dist-${{ inputs.os }}
+          path: |
+            ${{ inputs.cache_dir }}/*costflow*
+          if-no-files-found: error
+
+      - name: Upload error logs
+        uses: actions/upload-artifact@v3
+        if: always() && env.has_notarization_error == 1
+        with:
+          name: error-logs-${{ inputs.os }}
+          path: |
+            notarization-error.log
