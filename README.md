@@ -6,7 +6,7 @@ This repository is the source code of Costflow desktop apps.
 
 ## Download
 
-todo
+https://github.com/costflow/desktop/releases
 
 ## Desktop Features
 
@@ -25,13 +25,12 @@ Tickets can be filed at on the Github issues page:
 https://github.com/costflow/desktop/issues
 
 ## Donate
+
 Thank you for considering donating to Costflow. You can use one of the following methods:
 
 - Buy Me a Coffee: https://www.buymeacoffee.com/leplay
 - 支付宝 <br/> <img src="https://www.costflow.io/img/alipay.jpg" alt="Alipay" width="400"/>
 - 微信 <br/> <img src="https://www.costflow.io/img/wechat.png" alt="Wechat" width="400"/>
-
-
 
 ## Author
 
