@@ -58,7 +58,7 @@ jobs:
 
       - run: yarn install --frozen-lockfile --immutable --network-timeout ${{ inputs.npm_network_timeout }}
 
-      - run: yarn compile
+      - run: yarn build
 
       - name: Prepare for app notarization (macOS)
         if: startsWith(inputs.os, 'macos')
