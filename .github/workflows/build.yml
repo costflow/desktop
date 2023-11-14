@@ -12,12 +12,15 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
       - name: Install Node.js, NPM and Yarn
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: yarn
+
+      - run: yarn install --frozen-lockfile --immutable --network-timeout ${{ inputs.npm_network_timeout }}
 
       - name: Build/release Electron app
         uses: paneron/action-electron-builder@v1.8.1
