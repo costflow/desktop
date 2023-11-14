@@ -18,9 +18,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: yarn
 
-      - run: yarn install
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
       - name: Build/release Electron app
         uses: paneron/action-electron-builder@v1.8.1
