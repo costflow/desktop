@@ -6,7 +6,7 @@
 
 This repository is the source code of Costflow desktop apps.
 
-## Download for Mac / Windows / Linux
+## Download for Mac / Windows
 
 https://download.costflow.io/
 
